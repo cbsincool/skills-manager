@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 
 /// Vendors whose Windows state lives at `%LOCALAPPDATA%\<vendor>` rather than
 /// `~/.<vendor>`. See [`ToolAdapter::data_local_candidate`].
-const WINDOWS_DATA_LOCAL_VENDORS: &[&str] = &["hermes"];
+const WINDOWS_DATA_LOCAL_VENDORS: &[&str] = &[];
 
 /// Top-level grouping for sidebar/overview display. Does not affect skill
 /// deployment, sync, or any other backend behavior — purely a UI taxonomy.
