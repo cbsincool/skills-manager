@@ -1,0 +1,61 @@
+name: Fork Windows Build
+
+# Fork-only. The upstream release workflow builds five platforms and requires
+# Apple signing secrets this fork does not have. This one builds a Windows x64
+# installer of whatever commit it runs on, so a machine can install a build that
+# carries a fork-only fix before it lands upstream.
+#
+# createUpdaterArtifacts is off (see tauri.fork.conf.json): the updater key is
+# upstream's, so a fork build cannot produce artifacts that build would accept.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build installer
+        run: npm run tauri build -- --target x86_64-pc-windows-msvc --config src-tauri/tauri.fork.conf.json
+
+      - name: Report what was built
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -p "'version=' + require('./package.json').version"
+          find src-tauri/target/x86_64-pc-windows-msvc/release/bundle -type f \
+            \( -name '*.exe' -o -name '*.msi' \) -printf '%p  %s bytes\n'
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: skills-manager-windows-x64
+          if-no-files-found: error
+          path: |
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi

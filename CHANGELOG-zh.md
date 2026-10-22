@@ -5,6 +5,17 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.42.3] - 2026-10-21
+
+### 发布概览
+- Windows：Hermes Agent 现在解析到它真正使用的目录，技能列表、部署和预设不再跟着一个废弃文件夹走。
+
+### 用户可见更新
+- **Windows：Hermes Agent 的技能目录解析到 `%LOCALAPPDATA%\hermes\skills`** — 适配器此前只看 `~/.hermes/skills`。当两个目录同时存在时（老版本 Hermes 在用户目录留下了残留），应用列出的是旧技能，部署写到当前 Hermes 已不再读取的位置，更新检查也跟错了目录。现在只有 Hermes 会优先尝试平台数据目录，其余 agent 的路径保持不变（#593）。
+
+### 开发者与治理更新
+- `ToolAdapter::candidate_paths` 继续生成用户目录下的候选路径，并对 `WINDOWS_DATA_LOCAL_VENDORS` 中的厂商额外生成平台数据目录候选。排序规则抽到纯函数 `candidate_paths_in(home, config_dir, data_local_dir)`，无需读环境即可测试。
+
 ## [1.42.2] - 2026-10-18
 
 ### 发布概览
