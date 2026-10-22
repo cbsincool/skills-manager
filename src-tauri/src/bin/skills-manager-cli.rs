@@ -1788,9 +1788,10 @@ fn expand_path(s: &str) -> anyhow::Result<PathBuf> {
 }
 
 fn dirs_home() -> anyhow::Result<PathBuf> {
-    std::env::var_os("HOME")
-        .map(PathBuf::from)
-        .ok_or_else(|| anyhow!("HOME env var not set"))
+    // `HOME` is a Unix convention: Windows sets `USERPROFILE`, not `HOME`, so
+    // reading the variable directly made `skills adopt ~/...` fail there while
+    // the rest of the app (which goes through `dirs::home_dir()`) worked fine.
+    dirs::home_dir().ok_or_else(|| anyhow!("cannot determine the home directory"))
 }
 
 // ── update / check ────────────────────────────────────────────────────────
